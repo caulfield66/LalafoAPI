@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/v1/', include(router.urls)),
     path('api/v1/', include('account.urls')),
     path('api/v1/', include('post.urls')),
+    path('api/v1/docs/', schema_view.with_ui()),
     path('', api_root),
     path('api/v1/comments/', CommentCreateView.as_view(), name="create-comment")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
