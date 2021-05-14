@@ -31,7 +31,6 @@ class Post(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
 
-    tags = models.ManyToManyField(Tag)
     image = models.ImageField(upload_to='posts/')
     posted = models.DateTimeField(auto_now_add=True)
 

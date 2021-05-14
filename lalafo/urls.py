@@ -47,7 +47,7 @@ urlpatterns = [
 #     path('admin/', admin.site.urls),
 #     path('api/v1/categories/', CategoriesListView.as_view(), name='categories-list'),
 #     path('api/v1/tags/', TagsListView.as_view(), name='tags-list'),
-#     # path('', api_root),
+#     path('', api_root),
 #     path('api/v1/posts/', PostViewSet.as_view(
 #         {'post': 'create', 'get': 'list'}
 #     ), name='post-list'),

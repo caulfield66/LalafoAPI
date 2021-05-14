@@ -37,13 +37,13 @@ class PostSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = request.user
         post = Post.objects.create(user=user, **validated_data)
+        return post
 
     def get_fields(self):
         action = self.context.get('action')
         fields = super().get_fields()
         if action == 'list':
             fields.pop('description')
-            fields.pop('tags')
             fields.pop('category')
             fields.pop('posted')
         elif action == 'create':
@@ -54,9 +54,8 @@ class PostSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['category'] = CategorySerializer(instance.category, context=self.context).data
-        representation['tags'] = TagSerializer(instance.tags.all(), many=True, context=self.context).data
-        # representation['comments'] = CommentSerializer(instance.comments.all(), many=True).data
-        # representation['likes_count'] = instance.likes.count()
+        representation['comments'] = CommentSerializer(instance.comments.all(), many=True).data
+        representation['likes_count'] = instance.likes.count()
         return representation
 
 

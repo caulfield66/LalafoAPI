@@ -28,8 +28,8 @@ class PostViewSet(ModelViewSet):
     serializer_class = PostSerializer
     lookup_url_kwarg = 'slug'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['tags__slug', 'category', 'user']
-    # search_fields = ['title', 'description', 'tags__slug']
+    filterset_fields = ['category', 'user']
+    search_fields = ['title', 'description',]
     ordering_fields = ['price', 'posted', 'title']
 
     def get_serializer_class(self):
@@ -40,12 +40,21 @@ class PostViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'request': self.request, 'action': self.action}
 
-    @action(['GET'], detail=True)
+    @action(['GET', 'POST'], detail=True)
     def comments(self, request, slug=None):
-        post = self.get_object()
-        comments = post.comments.all()
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
+        if request.method == 'GET':
+            post = self.get_object()
+            comments = post.comments.all()
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data)
+        elif request.method == "POST":
+            serializer = CommentSerializer(data=request.data, context={'request': request})
+            post = self.get_object()
+            user = request.user
+            Comment.objects.create(post=post, user=user, rating=request.data.get('rating'), text=request.data.get('text'))
+            return Response('Комментарий успешно добавлен', status=200)
+
+
 
     @action(['POST'], detail=True)
     def like(self, request, slug=None):
@@ -63,8 +72,8 @@ class PostViewSet(ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            permissions = [IsAdminPermission]
-        elif self.action in ['update', 'partial_update', 'destroy']:
+            permissions = [IsAuthenticated, ]
+        elif self.action in ['create', 'update', 'partial_update', 'destroy']:
             permissions = [IsAuthorPermission]
         elif self.action == 'like':
             permissions = [IsAuthenticated]
@@ -78,7 +87,7 @@ def api_root(request, format=None):
     return Response({
         'posts': reverse('post-list', request=request, format=format),
         'categories': reverse('categories-list', request=request, format=format),
-        'tags': reverse('tags-list', request=request, format=format)
+        # 'tags': reverse('tags-list', request=request, format=format)
     })
 
 class CommentCreateView(CreateAPIView):
